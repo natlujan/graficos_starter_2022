@@ -9,56 +9,64 @@ from glew_wish import *
 import glfw
 import math
 
-rotacion = 0.0
-escala = 0.5
-
-def actualizar():
-    global rotacion
-    global escala
-    rotacion = rotacion + 0.1
-    if (rotacion >= 360.0):
-        rotacion = 0.0
-    escala = escala + 0.001
-    if (escala >= 2.0):
-        escala = 5.0
+color = [0.6, 0.1, 0.7]
+posicion = [-0.4,0.2]
+velocidad = 0.01
 
 
-def draw_ejes():
-    glBegin(GL_LINES)
-    glColor(0.0, 0.0, 0.0)
-    glVertex3f(-1.0, 0.0, 0.0)
-    glVertex3f(1.0, 0.0, 0.0)
+def key_callback(window, key, scancode, action, mods):
+    global color
+    global posicion
+    global velocidad
 
-    glVertex3f(0.0, 1.0, 0.0)
-    glVertex3f(0.0, -1.0, 0.0)
-    glEnd()
+    #Que la tecla escape cierre ventana al ser presionado
+    if key == glfw.KEY_ESCAPE and action == glfw.PRESS:
+        glfw.set_window_should_close(window, 1)
+    if key == glfw.KEY_R and action == glfw.PRESS:
+        color = [1.0,0.0,0.0]
+    if key == glfw.KEY_G and action == glfw.PRESS:
+        color = [0.0,1.0,0.0]
+    if key == glfw.KEY_B and action == glfw.PRESS:
+        color = [0.0,0.0,1.0]
 
-def draw_triangulo():
-    global rotacion
-    global escala
+    #Al presionar arriba se mueve hacia arriba
+    if key == glfw.KEY_UP and (action == glfw.PRESS or glfw.REPEAT):
+        posicion[1] = posicion [1] + velocidad
+        if posicion[1] >= 1:
+            posicion[1] = -0.9999
+    #Al presionar abajo se mueve hacia abajo
+    if key == glfw.KEY_DOWN and (action == glfw.PRESS or glfw.REPEAT):
+        posicion[1] = posicion [1] - velocidad
+        if posicion[1] <= -1:
+            posicion[1] = 0.9999
+    #Al presionar derecha se mueve hacia derecha
+    if key == glfw.KEY_RIGHT and (action == glfw.PRESS or glfw.REPEAT):
+        posicion[0] = posicion [0] + velocidad
+        if posicion[0] >= 1:
+            posicion[0] = -0.9999
+    #Al presionar izquierda se mueve hacia izquierda
+    if key == glfw.KEY_LEFT and (action == glfw.PRESS or glfw.REPEAT):
+        posicion[0] = posicion [0] - velocidad
+        if posicion[0] <= -1:
+            posicion[0] = 0.9999
+
+def draw():
+    global color
+
     glPushMatrix()
-
-    #Transformar
-    #glTranslatef(0.75, -0.82, 0.0)
-    glRotatef(rotacion, 0.0, 0.0, 1.0)
-    glScalef(escala, escala, 1.0)
-
+    glTranslatef(posicion[0], posicion[1], 0.0)
     glBegin(GL_TRIANGLES)
 
     #Establecer color
-    glColor3f(1.0, 0.0, 0.0)
+    glColor3f(color[0],color[1],color[2])
 
     #Manda vertices a dibujar
-    glVertex3f(-0.1, -0.1, 0.0) #Abajo izquierda
-    glVertex3f(0.0, 0.1, 0.0) #Arriba
-    glVertex3f(0.1, -0.1, 0.0) #Abajo derecha
+    glVertex3f(-0.08,-0.08,0)
+    glVertex3f(0,0.08,0)
+    glVertex3f(0.08,-0.08,0)
 
     glEnd()
     glPopMatrix()
-
-def draw():
-    draw_triangulo()
-    draw_ejes()
 
 def main():
     width = 700
@@ -97,20 +105,21 @@ def main():
     version = glGetString(GL_VERSION)
     print(version)
 
+    #Establecer el key callback
+    glfw.set_key_callback(window, key_callback)
+
     #Draw loop
     while not glfw.window_should_close(window):
         #Establecer el viewport
         #glViewport(0,0,width,height)
         #Establecer color de borrado
-        glClearColor(0.7, 0.7, 0.7, 1)
+        glClearColor(0.7,0.7,0.7,1)
         #Borrar el contenido del viewport
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        #Actualizar
-        actualizar()
-
         #Dibujar
         draw()
+
 
         #Polling de inputs
         glfw.poll_events()
